@@ -54,11 +54,19 @@ def analyze_sentiment(text):
 
     # Determine sentiment based on compound score
     if compound_score >= 0.05:
-        return "Positive", compound_score
+        sentiment_label = "Positive"
     elif compound_score <= -0.05:
-        return "Negative", compound_score
+        sentiment_label = "Negative"
     else:
-        return "Neutral", compound_score
+        sentiment_label = "Neutral"
+
+    return (
+        sentiment_label,
+        sentiment["neg"],
+        sentiment["neu"],
+        sentiment["pos"],
+        compound_score,
+    )
 
 
 # Function to process all images in a folder
@@ -81,9 +89,15 @@ def process_folder(folder_path):
             print(f"Translated Text: {translated_text}")
 
             # Analyze sentiment of the translated text
-            sentiment_translated, score_translated = analyze_sentiment(translated_text)
+            (
+                sentiment_translated,
+                neg_translated,
+                neu_translated,
+                pos_translated,
+                score_translated,
+            ) = analyze_sentiment(translated_text)
             print(
-                f"Sentiment of Translated Text: {sentiment_translated} (Score: {score_translated})"
+                f"Sentiment of Translated Text: {sentiment_translated} (neg={neg_translated}, neu={neu_translated}, pos={pos_translated}, Score: {score_translated})"
             )
 
             # Generate a caption describing the image using BLIP
@@ -93,9 +107,11 @@ def process_folder(folder_path):
             )  # Print the generated description of the image
 
             # Analyze sentiment of the image caption
-            sentiment_caption, score_caption = analyze_sentiment(image_caption)
+            sentiment_caption, neg_caption, neu_caption, pos_caption, score_caption = (
+                analyze_sentiment(image_caption)
+            )
             print(
-                f"Sentiment of Image Caption: {sentiment_caption} (Score: {score_caption})"
+                f"Sentiment of Image Caption: {sentiment_caption} (neg={neg_caption}, neu={neu_caption}, pos={pos_caption}, Score: {score_caption})"
             )
 
             # Calculate overall sentiment based on both scores (translated text + image caption)
@@ -109,8 +125,8 @@ def process_folder(folder_path):
 
             print(f"Overall Sentiment: {overall_sentiment} (Score: {overall_score})")
 
-            # Print separator
-            print("\n" + "#" * 30 + "\n")
+            # Print separator (now 100 "#")
+            print("\n" + "#" * 100 + "\n")
 
 
 # Main function to handle user input
@@ -147,9 +163,15 @@ if __name__ == "__main__":
             print(f"Translated Text: {translated_text}")
 
             # Analyze sentiment of the translated text
-            sentiment_translated, score_translated = analyze_sentiment(translated_text)
+            (
+                sentiment_translated,
+                neg_translated,
+                neu_translated,
+                pos_translated,
+                score_translated,
+            ) = analyze_sentiment(translated_text)
             print(
-                f"Sentiment of Translated Text: {sentiment_translated} (Score: {score_translated})"
+                f"Sentiment of Translated Text: {sentiment_translated} (neg={neg_translated}, neu={neu_translated}, pos={pos_translated}, Score: {score_translated})"
             )
 
             # Generate a caption describing the image using BLIP
@@ -159,9 +181,11 @@ if __name__ == "__main__":
             )  # Print the generated description of the image
 
             # Analyze sentiment of the image caption
-            sentiment_caption, score_caption = analyze_sentiment(image_caption)
+            sentiment_caption, neg_caption, neu_caption, pos_caption, score_caption = (
+                analyze_sentiment(image_caption)
+            )
             print(
-                f"Sentiment of Image Caption: {sentiment_caption} (Score: {score_caption})"
+                f"Sentiment of Image Caption: {sentiment_caption} (neg={neg_caption}, neu={neu_caption}, pos={pos_caption}, Score: {score_caption})"
             )
 
             # Calculate overall sentiment based on both scores (translated text + image caption)
