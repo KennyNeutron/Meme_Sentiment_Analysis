@@ -21,7 +21,7 @@ def translate_text(text, target_language="en"):
 
 
 # Example usage
-image_path = "your_image.jpg"  # Replace with your image path
+image_path = "images_TestImages/img_001.jpg"  # Replace with your image path
 extracted_text = extract_text_with_easyocr(image_path)
 print(f"Extracted Text: {extracted_text}")  # Corrected the string formatting
 
