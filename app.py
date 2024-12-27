@@ -54,11 +54,11 @@ def analyze_sentiment(text):
 
     # Determine sentiment based on compound score
     if compound_score >= 0.05:
-        return "Positive"
+        return "Positive", compound_score
     elif compound_score <= -0.05:
-        return "Negative"
+        return "Negative", compound_score
     else:
-        return "Neutral"
+        return "Neutral", compound_score
 
 
 # Function to process all images in a folder
@@ -74,10 +74,6 @@ def process_folder(folder_path):
             extracted_text = extract_text_with_easyocr(image_path)
             print(f"Extracted Text: {extracted_text}")
 
-            # Analyze sentiment of the extracted text
-            sentiment = analyze_sentiment(extracted_text)
-            print(f"Sentiment of Extracted Text: {sentiment}")
-
             # Translate extracted text if it's in Tagalog (Filipino)
             translated_text = translate_text(
                 extracted_text, "en"
@@ -85,8 +81,10 @@ def process_folder(folder_path):
             print(f"Translated Text: {translated_text}")
 
             # Analyze sentiment of the translated text
-            sentiment_translated = analyze_sentiment(translated_text)
-            print(f"Sentiment of Translated Text: {sentiment_translated}")
+            sentiment_translated, score_translated = analyze_sentiment(translated_text)
+            print(
+                f"Sentiment of Translated Text: {sentiment_translated} (Score: {score_translated})"
+            )
 
             # Generate a caption describing the image using BLIP
             image_caption = generate_caption(image_path)
@@ -95,10 +93,21 @@ def process_folder(folder_path):
             )  # Print the generated description of the image
 
             # Analyze sentiment of the image caption
-            sentiment_caption = analyze_sentiment(image_caption)
+            sentiment_caption, score_caption = analyze_sentiment(image_caption)
             print(
-                f"Sentiment of Image Caption: {sentiment_caption}"
-            )  # Print the sentiment of the image caption
+                f"Sentiment of Image Caption: {sentiment_caption} (Score: {score_caption})"
+            )
+
+            # Calculate overall sentiment based on both scores (translated text + image caption)
+            overall_score = score_translated + score_caption
+            if overall_score >= 0.05:
+                overall_sentiment = "Positive"
+            elif overall_score <= -0.05:
+                overall_sentiment = "Negative"
+            else:
+                overall_sentiment = "Neutral"
+
+            print(f"Overall Sentiment: {overall_sentiment} (Score: {overall_score})")
 
             # Print separator
             print("\n" + "#" * 30 + "\n")
@@ -131,10 +140,6 @@ if __name__ == "__main__":
             extracted_text = extract_text_with_easyocr(image_path)
             print(f"Extracted Text: {extracted_text}")
 
-            # Analyze sentiment of the extracted text
-            sentiment = analyze_sentiment(extracted_text)
-            print(f"Sentiment of Extracted Text: {sentiment}")
-
             # Translate extracted text if it's in Tagalog (Filipino)
             translated_text = translate_text(
                 extracted_text, "en"
@@ -142,8 +147,10 @@ if __name__ == "__main__":
             print(f"Translated Text: {translated_text}")
 
             # Analyze sentiment of the translated text
-            sentiment_translated = analyze_sentiment(translated_text)
-            print(f"Sentiment of Translated Text: {sentiment_translated}")
+            sentiment_translated, score_translated = analyze_sentiment(translated_text)
+            print(
+                f"Sentiment of Translated Text: {sentiment_translated} (Score: {score_translated})"
+            )
 
             # Generate a caption describing the image using BLIP
             image_caption = generate_caption(image_path)
@@ -152,10 +159,21 @@ if __name__ == "__main__":
             )  # Print the generated description of the image
 
             # Analyze sentiment of the image caption
-            sentiment_caption = analyze_sentiment(image_caption)
+            sentiment_caption, score_caption = analyze_sentiment(image_caption)
             print(
-                f"Sentiment of Image Caption: {sentiment_caption}"
-            )  # Print the sentiment of the image caption
+                f"Sentiment of Image Caption: {sentiment_caption} (Score: {score_caption})"
+            )
+
+            # Calculate overall sentiment based on both scores (translated text + image caption)
+            overall_score = score_translated + score_caption
+            if overall_score >= 0.05:
+                overall_sentiment = "Positive"
+            elif overall_score <= -0.05:
+                overall_sentiment = "Negative"
+            else:
+                overall_sentiment = "Neutral"
+
+            print(f"Overall Sentiment: {overall_sentiment} (Score: {overall_score})")
 
         else:
             print(f"The file '{image_path}' does not exist.")
