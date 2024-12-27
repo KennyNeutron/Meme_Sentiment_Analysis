@@ -5,6 +5,8 @@ from transformers import BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 
 # Initialize the VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
@@ -70,6 +72,20 @@ def analyze_sentiment(text):
     )
 
 
+# Function to calculate confidence level (as percentage)
+def calculate_confidence(overall_score):
+    # Calculate the confidence percentage and ensure it is capped between 50% and 100%
+    confidence = (
+        abs(overall_score) * 100
+    )  # Absolute value of the overall sentiment score
+
+    # If the confidence level is below 50%, set it to 50% (minimum threshold)
+    if confidence < 50:
+        confidence = 50
+
+    return round(confidence, 2)  # Round to 2 decimal places
+
+
 # Function to process all images in a folder and save results to Excel
 def process_folder(folder_path):
     # Prepare a list to collect data for the Excel file
@@ -117,6 +133,9 @@ def process_folder(folder_path):
             else:
                 overall_sentiment = "Neutral"
 
+            # Calculate confidence level as percentage
+            confidence_level = calculate_confidence(overall_score)
+
             # Add data to the results list
             results.append(
                 {
@@ -127,6 +146,7 @@ def process_folder(folder_path):
                     "Image Caption": image_caption,
                     "Caption Sentiment": sentiment_caption,
                     "Overall Sentiment": overall_sentiment,
+                    "Confidence": f"{confidence_level}%",  # Add % sign to confidence
                 }
             )
 
@@ -142,9 +162,34 @@ def process_folder(folder_path):
         # Convert the results to a DataFrame
         df = pd.DataFrame(results)
 
-        # Save the DataFrame to an Excel file
+        # Create an Excel workbook and add the data
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Sentiment Analysis Results"
+
+        # Add the column headers
+        sheet.append(df.columns.tolist())
+
+        # Fill the Excel sheet with the rows from the DataFrame
+        for row in dataframe_to_rows(df, index=False, header=False):
+            sheet.append(row)
+
+        # Autofit columns based on content
+        for col in sheet.columns:
+            max_length = 0
+            column = col[0].column_letter  # Get the column name
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_width = max_length + 2
+            sheet.column_dimensions[column].width = adjusted_width
+
+        # Save the Excel workbook
         output_file = os.path.join(output_folder, "sentiment_analysis_results.xlsx")
-        df.to_excel(output_file, index=False)
+        workbook.save(output_file)
         print(f"Results saved to {output_file}")
     else:
         print("No images found to process.")
@@ -219,6 +264,10 @@ if __name__ == "__main__":
                 overall_sentiment = "Neutral"
 
             print(f"Overall Sentiment: {overall_sentiment} (Score: {overall_score})")
+
+            # Calculate confidence level as percentage
+            confidence_level = calculate_confidence(overall_score)
+            print(f"Confidence Level: {confidence_level}%")
 
         else:
             print(f"The file '{image_path}' does not exist.")
