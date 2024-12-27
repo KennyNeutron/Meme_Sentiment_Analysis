@@ -74,15 +74,24 @@ def analyze_sentiment(text):
 
 # Function to calculate confidence level (as percentage)
 def calculate_confidence(overall_score):
-    # Calculate the confidence percentage and ensure it is capped between 50% and 100%
-    confidence = (
-        abs(overall_score) * 100
-    )  # Absolute value of the overall sentiment score
+    # Calculate the absolute value of the overall score as a base for confidence
+    confidence = abs(overall_score) * 100  # Multiply by 100 to get percentage
 
-    # If the confidence level is below 50%, set it to 50% (minimum threshold)
+    # Apply exponential scaling to boost the confidence for stronger scores
     if confidence < 50:
-        confidence = 50
+        confidence = 50 + (
+            confidence * 0.5
+        )  # Gradually increase confidence for smaller scores
+    else:
+        # Exponential boost for stronger scores
+        confidence = (
+            50 + (confidence**1.8) / 20
+        )  # Exponential scaling for stronger confidence
 
+    # Cap the confidence to 100% for stronger sentiments
+    confidence = min(confidence, 100)
+
+    # Return confidence as a percentage (round to 2 decimal places)
     return round(confidence, 2)  # Round to 2 decimal places
 
 
