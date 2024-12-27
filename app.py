@@ -4,6 +4,7 @@ from googletrans import Translator
 from transformers import BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import pandas as pd
 
 # Initialize the VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
@@ -69,8 +70,12 @@ def analyze_sentiment(text):
     )
 
 
-# Function to process all images in a folder
+# Function to process all images in a folder and save results to Excel
 def process_folder(folder_path):
+    # Prepare a list to collect data for the Excel file
+    results = []
+
+    # Loop through all files in the folder
     for filename in os.listdir(folder_path):
         # Check if the file is an image (you can extend this list if needed)
         if filename.lower().endswith((".jpg", ".jpeg", ".png")):
@@ -80,13 +85,11 @@ def process_folder(folder_path):
 
             # Extract text using EasyOCR
             extracted_text = extract_text_with_easyocr(image_path)
-            print(f"Extracted Text: {extracted_text}")
 
             # Translate extracted text if it's in Tagalog (Filipino)
             translated_text = translate_text(
                 extracted_text, "en"
             )  # Translate to English
-            print(f"Translated Text: {translated_text}")
 
             # Analyze sentiment of the translated text
             (
@@ -96,22 +99,13 @@ def process_folder(folder_path):
                 pos_translated,
                 score_translated,
             ) = analyze_sentiment(translated_text)
-            print(
-                f"Sentiment of Translated Text: {sentiment_translated} (neg={neg_translated}, neu={neu_translated}, pos={pos_translated}, Score: {score_translated})"
-            )
 
             # Generate a caption describing the image using BLIP
             image_caption = generate_caption(image_path)
-            print(
-                f"Image Caption: {image_caption}"
-            )  # Print the generated description of the image
 
             # Analyze sentiment of the image caption
             sentiment_caption, neg_caption, neu_caption, pos_caption, score_caption = (
                 analyze_sentiment(image_caption)
-            )
-            print(
-                f"Sentiment of Image Caption: {sentiment_caption} (neg={neg_caption}, neu={neu_caption}, pos={pos_caption}, Score: {score_caption})"
             )
 
             # Calculate overall sentiment based on both scores (translated text + image caption)
@@ -123,10 +117,37 @@ def process_folder(folder_path):
             else:
                 overall_sentiment = "Neutral"
 
-            print(f"Overall Sentiment: {overall_sentiment} (Score: {overall_score})")
+            # Add data to the results list
+            results.append(
+                {
+                    "File Name": filename,
+                    "Extracted Text": extracted_text,
+                    "Translated Text": translated_text,
+                    "Text Sentiment": sentiment_translated,
+                    "Image Caption": image_caption,
+                    "Caption Sentiment": sentiment_caption,
+                    "Overall Sentiment": overall_sentiment,
+                }
+            )
 
-            # Print separator (now 100 "#")
+            # Print separator (100 "#")
             print("\n" + "#" * 100 + "\n")
+
+    # Save results to an Excel file
+    if results:
+        output_folder = os.path.join(os.path.dirname(folder_path), "results")
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+
+        # Convert the results to a DataFrame
+        df = pd.DataFrame(results)
+
+        # Save the DataFrame to an Excel file
+        output_file = os.path.join(output_folder, "sentiment_analysis_results.xlsx")
+        df.to_excel(output_file, index=False)
+        print(f"Results saved to {output_file}")
+    else:
+        print("No images found to process.")
 
 
 # Main function to handle user input
