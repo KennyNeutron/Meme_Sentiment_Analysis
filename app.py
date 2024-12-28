@@ -7,6 +7,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
+import matplotlib.pyplot as plt
 
 # Initialize the VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
@@ -83,12 +84,12 @@ def calculate_confidence(overall_score):
             confidence * 0.5
         )  # Gradually increase confidence for smaller scores
     else:
-        # Exponential boost for stronger scores
+        # For larger scores, we increase the confidence more aggressively
         confidence = (
             50 + (confidence**1.8) / 20
-        )  # Exponential scaling for stronger confidence
+        )  # Exponential boost for stronger confidence
 
-    # Cap the confidence to 100% for stronger sentiments
+    # Cap the confidence to 100%
     confidence = min(confidence, 100)
 
     # Return confidence as a percentage (round to 2 decimal places)
@@ -202,6 +203,40 @@ def process_folder(folder_path):
         print(f"Results saved to {output_file}")
     else:
         print("No images found to process.")
+
+    # Create a bar graph from the overall sentiments
+    sentiment_counts = {"Positive": 0, "Neutral": 0, "Negative": 0}
+
+    # Count occurrences of each sentiment
+    for result in results:
+        sentiment = result["Overall Sentiment"]
+        if sentiment in sentiment_counts:
+            sentiment_counts[sentiment] += 1
+
+    # Plotting the bar graph
+    labels = sentiment_counts.keys()
+    counts = sentiment_counts.values()
+
+    fig, ax = plt.subplots()
+    bars = ax.bar(labels, counts, color=["green", "gray", "red"])
+    ax.set_title("Sentiment Distribution")
+    ax.set_xlabel("Sentiment")
+    ax.set_ylabel("Count")
+
+    # Add the count value at the top of each bar
+    for bar in bars:
+        yval = bar.get_height()
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            yval + 0.1,
+            int(yval),
+            ha="center",
+            va="bottom",
+        )
+
+    # Save the graph as an image
+    plt.savefig(os.path.join(output_folder, "sentiment_distribution.png"))
+    plt.show()
 
 
 # Main function to handle user input
