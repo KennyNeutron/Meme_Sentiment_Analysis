@@ -26,9 +26,15 @@ def extract_text_with_easyocr(image_path):
 
 
 def translate_text(text, target_language="en"):
-    translator = Translator()
-    translated = translator.translate(text, dest=target_language)
-    return translated.text
+    if not text.strip():  # Check if the text is empty or whitespace
+        return ""  # Return empty string if no text to translate
+    try:
+        translator = Translator()
+        translated = translator.translate(text, dest=target_language)
+        return translated.text
+    except Exception as e:
+        print(f"Error during translation: {e}")
+        return text  # Fallback to original text in case of an error
 
 
 def generate_caption(image_path):
@@ -112,19 +118,24 @@ def process_folder(folder_path):
             # Extract text using EasyOCR
             extracted_text = extract_text_with_easyocr(image_path)
 
-            # Translate extracted text if it's in Tagalog (Filipino)
-            translated_text = translate_text(
-                extracted_text, "en"
-            )  # Translate to English
-
-            # Analyze sentiment of the translated text
-            (
-                sentiment_translated,
-                neg_translated,
-                neu_translated,
-                pos_translated,
-                score_translated,
-            ) = analyze_sentiment(translated_text)
+            # If no text is extracted, assign neutral sentiment
+            if not extracted_text:
+                translated_text = ""
+                sentiment_translated = "Neutral"
+                score_translated = 0
+            else:
+                # Translate extracted text if it's in Tagalog (Filipino)
+                translated_text = translate_text(
+                    extracted_text, "en"
+                )  # Translate to English
+                # Analyze sentiment of the translated text
+                (
+                    sentiment_translated,
+                    neg_translated,
+                    neu_translated,
+                    pos_translated,
+                    score_translated,
+                ) = analyze_sentiment(translated_text)
 
             # Generate a caption describing the image using BLIP
             image_caption = generate_caption(image_path)

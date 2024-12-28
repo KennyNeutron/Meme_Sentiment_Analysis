@@ -26,5 +26,5 @@ def rename_files_in_folder(folder_path, new_name="img", start_index=1):
 
 
 drive_path = "D:/KennyNeutron_TheCoder/Projects"  # change this to the path of the project based on the user's computer
-folder_path = f"{drive_path}/A-MULTIMODAL-SENTIMENT-ANALYSIS-OF-INTERNET-MEMES-IN-THE-COURSE-OF-PHILIPPINE-ELECTIONS/images_DataSet"
+folder_path = f"{drive_path}/Meme_Sentiment_Analysis/images_DataSet"
 rename_files_in_folder(folder_path)
