@@ -33,8 +33,4 @@ def move_files(source_excel, source_png, destination_folder):
 
 
 # Example usage
-source_excel_path = "images_dataset/processed_results.xlsx"
-source_png_path = "images_dataset/sentiment_distribution.png"
-destination_path = "images_dataset/results"
 
-move_files(source_excel_path, source_png_path, destination_path)
