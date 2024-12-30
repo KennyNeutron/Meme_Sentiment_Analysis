@@ -1,7 +1,7 @@
 import os
 import easyocr
 from googletrans import Translator
-import requests
+from transformers import BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import pandas as pd
@@ -11,9 +11,6 @@ import matplotlib.pyplot as plt
 
 # Initialize the VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
-
-# DeepAI API key (replace with your own API key)
-DEEP_AI_API_KEY = "7778ebf6-e4ed-483a-922e-5a806f0b2f07"
 
 
 def extract_text_with_easyocr(image_path):
@@ -41,22 +38,22 @@ def translate_text(text, target_language="en"):
 
 
 def generate_caption(image_path):
-    # Make a request to DeepAI's Image Captioning API
-    url = "https://api.deepai.org/api/neuraltalk"
+    # Load BLIP model and processor
+    processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+    model = BlipForConditionalGeneration.from_pretrained(
+        "Salesforce/blip-image-captioning-base"
+    )
 
-    # Open image and prepare for API request
-    with open(image_path, "rb") as image_file:
-        response = requests.post(
-            url, files={"image": image_file}, headers={"api-key": DEEP_AI_API_KEY}
-        )
+    # Open the image
+    image = Image.open(image_path)
 
-    # If the request is successful, extract the caption
-    if response.status_code == 200:
-        caption = response.json().get("output", "")
-        return caption
-    else:
-        print(f"Error: {response.status_code}, {response.text}")
-        return "Error generating caption"
+    # Preprocess the image and generate the caption
+    inputs = processor(images=image, return_tensors="pt")
+    out = model.generate(**inputs)
+
+    # Decode and return the caption
+    caption = processor.decode(out[0], skip_special_tokens=True)
+    return caption
 
 
 # Function to analyze sentiment using VADER and return the actual sentiment
@@ -140,7 +137,7 @@ def process_folder(folder_path):
                     score_translated,
                 ) = analyze_sentiment(translated_text)
 
-            # Generate a caption describing the image using DeepAI's API
+            # Generate a caption describing the image using BLIP
             image_caption = generate_caption(image_path)
 
             # Analyze sentiment of the image caption
@@ -298,7 +295,7 @@ if __name__ == "__main__":
                 f"Sentiment of Translated Text: {sentiment_translated} (neg={neg_translated}, neu={neu_translated}, pos={pos_translated}, Score: {score_translated})"
             )
 
-            # Generate a caption describing the image using DeepAI's API
+            # Generate a caption describing the image using BLIP
             image_caption = generate_caption(image_path)
             print(
                 f"Image Caption: {image_caption}"
