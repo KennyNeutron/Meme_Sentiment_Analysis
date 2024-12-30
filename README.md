@@ -1,7 +1,7 @@
-
 # Meme Sentiment Analysis
 
 This project performs sentiment analysis on images using a combination of **EasyOCR**, **BLIP**, **VADER**, and **DeepAI**. The goal is to extract text from images (including memes), generate captions, analyze sentiments, and visualize the results. The project provides functionality to:
+
 - Extract text from images.
 - Translate extracted text to English (if necessary).
 - Generate captions for images.
@@ -10,6 +10,7 @@ This project performs sentiment analysis on images using a combination of **Easy
 - Generate a sentiment distribution bar graph.
 
 ## Key Features:
+
 - **Text Extraction**: Uses **EasyOCR** to extract text from images (supports multiple languages including Tagalog/Filipino).
 - **Image Caption Generation**: Uses **BLIP** or **DeepAI API** to generate captions for images.
 - **Sentiment Analysis**: Analyzes sentiment using **VADER Sentiment Analysis**.
@@ -20,25 +21,29 @@ This project performs sentiment analysis on images using a combination of **Easy
 ## Installation
 
 1. **Clone the repository**:
+
    ```
    git clone https://github.com/yourusername/meme-sentiment-analysis.git
    ```
 
 2. **Navigate to the project directory**:
+
    ```
    cd meme-sentiment-analysis
    ```
 
 3. **Set up the environment**:
    Create a virtual environment (optional but recommended):
+
    ```
    python -m venv venv
    ```
 
 4. **Activate the virtual environment**:
+
    - For Windows:
      ```
-     venv\Scriptsctivate
+     venv/Scripts/activate
      ```
    - For macOS/Linux:
      ```
@@ -46,6 +51,7 @@ This project performs sentiment analysis on images using a combination of **Easy
      ```
 
 5. **Install dependencies**:
+
    ```
    pip install -r requirements.txt
    ```
@@ -66,6 +72,7 @@ This project performs sentiment analysis on images using a combination of **Easy
 ## Usage
 
 1. **Process a Folder of Images**:
+
    - You can process a folder of images to extract text, generate captions, and analyze sentiment.
    - Run the following command:
      ```
@@ -75,6 +82,7 @@ This project performs sentiment analysis on images using a combination of **Easy
      - It will output results in an **Excel file** and generate a **bar graph** showing sentiment distribution.
 
 2. **Process a Single Image**:
+
    - Alternatively, you can process a **single image**.
    - Run the following command:
      ```
@@ -84,11 +92,13 @@ This project performs sentiment analysis on images using a combination of **Easy
      - The result will be displayed in the terminal and saved in an **Excel file**.
 
 3. **Folder Output**:
+
    - The processed images are categorized into two folders based on sentiment analysis:
      - **"with text"**: Images that contain valid, understandable text.
      - **"without text"**: Images with no text or non-understandable text.
 
 4. **Excel Output**:
+
    - The results are saved in an **Excel file** that contains the following columns:
      - **File Name**: The name of the image file.
      - **Extracted Text**: Text extracted from the image.
@@ -106,9 +116,9 @@ This project performs sentiment analysis on images using a combination of **Easy
 
 1. **Excel File**:
    The Excel file contains columns like:
-   | File Name      | Extracted Text  | Translated Text  | Text Sentiment | Image Caption  | Caption Sentiment | Overall Sentiment | Confidence |
+   | File Name | Extracted Text | Translated Text | Text Sentiment | Image Caption | Caption Sentiment | Overall Sentiment | Confidence |
    |----------------|-----------------|------------------|----------------|----------------|-------------------|-------------------|------------|
-   | image1.jpg     | This is a meme   | This is a meme    | Positive       | A person laughing | Positive           | Positive           | 85.00%     |
+   | image1.jpg | This is a meme | This is a meme | Positive | A person laughing | Positive | Positive | 85.00% |
 
 2. **Graph**:
    - A **sentiment distribution bar graph** is generated and saved. This graph shows how many images are **positive**, **neutral**, or **negative** based on sentiment analysis.
@@ -129,4 +139,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **VADER Sentiment Analysis**: Sentiment analysis tool used for analyzing extracted text and image captions.
 - **BLIP**: Image captioning model used for generating captions for images.
 - **DeepAI API**: Alternative image captioning API.
-
