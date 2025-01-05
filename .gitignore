@@ -1,7 +1,10 @@
 .venv/
+backup_DataSet
+images
 images_2022
 images_All
 images_DataSet_Final
 paperworks
+rejects
 Scraper
 TestRuns
