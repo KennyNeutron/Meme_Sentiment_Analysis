@@ -17,6 +17,7 @@ def generate_random_name(length=10):
 
 
 def rename_files_with_random_names(folder_path, name_length=20):
+    file_num = 0
     try:
         files = sorted(
             [
@@ -34,8 +35,9 @@ def rename_files_with_random_names(folder_path, name_length=20):
 
             os.rename(old_file_path, new_file_path)
             print(f"Renamed: {file_name} -> {new_file_name}")
+            file_num += 1
 
-        print("All files renamed successfully!")
+        print(f"All {file_num:,} files renamed successfully!")
     except Exception as e:
         print(f"An error occurred: {e}")
 
