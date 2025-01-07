@@ -8,6 +8,7 @@ import pandas as pd
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 import matplotlib.pyplot as plt
+from deep_translator import GoogleTranslator
 
 # Initialize the VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
@@ -29,9 +30,10 @@ def translate_text(text, target_language="en"):
     if not text.strip():  # Check if the text is empty or whitespace
         return ""  # Return empty string if no text to translate
     try:
-        translator = Translator()
-        translated = translator.translate(text, dest=target_language)
-        return translated.text
+        translated = GoogleTranslator(source="auto", target=target_language).translate(
+            text
+        )
+        return translated
     except Exception as e:
         print(f"Error during translation: {e}")
         return text  # Fallback to original text in case of an error
