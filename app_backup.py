@@ -90,45 +90,35 @@ def create_or_load_excel(output_folder, results):
     """Create or load the Excel file and append new results"""
     excel_file = os.path.join(output_folder, "sentiment_analysis_results.xlsx")
 
-    # Sort results by file name
-    results = results.sort_values(by="File Name")
+    if os.path.exists(excel_file):
+        workbook = load_workbook(excel_file)
+        sheet = workbook.active
+    else:
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Sentiment Analysis Results"
+        sheet.append(results.columns.tolist())
 
-    while True:
-        try:
-            if os.path.exists(excel_file):
-                workbook = load_workbook(excel_file)
-                sheet = workbook.active
-            else:
-                workbook = Workbook()
-                sheet = workbook.active
-                sheet.title = "Sentiment Analysis Results"
-                sheet.append(results.columns.tolist())
+    for row in dataframe_to_rows(results, index=False, header=False):
+        sheet.append(row)
 
-            for row in dataframe_to_rows(results, index=False, header=False):
-                sheet.append(row)
+    # Autofit column widths and align cells
+    for column in sheet.columns:
+        max_length = 0
+        column_letter = column[0].column_letter  # Get column letter
+        for cell in column:
+            try:
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            except:
+                pass
+        adjusted_width = max_length + 2
+        sheet.column_dimensions[column_letter].width = adjusted_width
+        for cell in column:
+            cell.alignment = Alignment(wrap_text=True, vertical="top")
 
-            # Autofit column widths and align cells
-            for column in sheet.columns:
-                max_length = 0
-                column_letter = column[0].column_letter  # Get column letter
-                for cell in column:
-                    try:
-                        if cell.value:
-                            max_length = max(max_length, len(str(cell.value)))
-                    except:
-                        pass
-                adjusted_width = max_length + 2
-                sheet.column_dimensions[column_letter].width = adjusted_width
-                for cell in column:
-                    cell.alignment = Alignment(wrap_text=True, vertical="top")
-
-            workbook.save(excel_file)
-            print(f"Results saved to {excel_file}")
-            break
-        except PermissionError:
-            input(
-                f"Please close the file '{excel_file}' and press Enter to continue..."
-            )
+    workbook.save(excel_file)
+    print(f"Results saved to {excel_file}")
 
 
 def process_image(file_path):
