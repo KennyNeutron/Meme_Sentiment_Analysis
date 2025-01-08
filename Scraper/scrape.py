@@ -136,7 +136,7 @@ def get_img_links(containers_length):
 
 def save_img(img):
     global img_count
-    save_dir = "Scraper/scraped_images"
+    save_dir = "Scraper/img/scraped_images"
     os.makedirs(save_dir, exist_ok=True)  # Ensure the directory exists
 
     try:
