@@ -13,6 +13,7 @@ import torch
 from torch.cuda.amp import autocast
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
+import time
 
 # Initialize the VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
@@ -48,7 +49,7 @@ def generate_caption(image_path):
 
     image = Image.open(image_path)
     inputs = processor(images=image, return_tensors="pt").to("cuda")
-    with autocast():
+    with torch.amp.autocast("cuda"):
         out = model.generate(**inputs)
     caption = processor.decode(out[0], skip_special_tokens=True)
     return caption
@@ -88,7 +89,7 @@ def calculate_confidence(overall_score):
 
 def create_or_load_excel(output_folder, results):
     """Create or load the Excel file and append new results"""
-    excel_file = os.path.join(output_folder, "sentiment_analysis_results.xlsx")
+    excel_file = os.path.join(output_folder, "Sentiment_Analysis_Results.xlsx")
 
     # Sort results by file name
     results = results.sort_values(by="File Name")
@@ -151,7 +152,20 @@ def process_image(file_path):
                 score_translated,
             ) = analyze_sentiment(translated_text)
 
-        image_caption = generate_caption(file_path)
+        # Retry mechanism for GPU memory
+        for _ in range(5):  # Maximum retry attempts
+            try:
+                with torch.amp.autocast("cuda"):
+                    image_caption = generate_caption(file_path)
+                break  # Exit the retry loop if successful
+            except torch.cuda.OutOfMemoryError:
+                print(f"CUDA Out of Memory for {file_path}. Retrying...")
+                torch.cuda.empty_cache()
+                time.sleep(1)  # Wait 1 second before retrying
+        else:
+            print(f"Failed to process {file_path} due to persistent GPU memory issues.")
+            return None
+
         (
             sentiment_caption,
             neg_caption,
@@ -184,7 +198,7 @@ def process_image(file_path):
 
 
 def process_folder_parallel(folder_path):
-    """Process images in a folder using parallel processing"""
+    """Process images in a folder with a maximum of 5 at a time"""
     image_files = [
         os.path.join(folder_path, f)
         for f in os.listdir(folder_path)
@@ -194,7 +208,7 @@ def process_folder_parallel(folder_path):
     results = []
     error_count = 0
 
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:  # Limit to 5 threads
         futures = {executor.submit(process_image, file): file for file in image_files}
         for future in tqdm(
             as_completed(futures), total=len(image_files), desc="Processing Images"
@@ -255,11 +269,23 @@ if __name__ == "__main__":
                 f"Sentiment of Translated Text: {sentiment_translated} (neg={neg_translated}, neu={neu_translated}, pos={pos_translated}, Score: {score_translated})"
             )
 
-            # Generate a caption describing the image using BLIP
-            image_caption = generate_caption(image_path)
-            print(
-                f"Image Caption: {image_caption}"
-            )  # Print the generated description of the image
+            # Retry mechanism for GPU memory
+            for _ in range(5):  # Maximum retry attempts
+                try:
+                    with torch.amp.autocast("cuda"):
+                        image_caption = generate_caption(image_path)
+                    break  # Exit the retry loop if successful
+                except torch.cuda.OutOfMemoryError:
+                    print(f"CUDA Out of Memory for {image_path}. Retrying...")
+                    torch.cuda.empty_cache()
+                    time.sleep(1)  # Wait 1 second before retrying
+            else:
+                print(
+                    f"Failed to process {image_path} due to persistent GPU memory issues."
+                )
+                exit()
+
+            print(f"Image Caption: {image_caption}")
 
             # Analyze sentiment of the image caption
             sentiment_caption, neg_caption, neu_caption, pos_caption, score_caption = (
@@ -289,3 +315,7 @@ if __name__ == "__main__":
 
     else:
         print("Invalid choice! Please enter 'image' or 'folder'.")
+
+
+# run this on the terminal (powershell) before running the code
+# $env:PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
