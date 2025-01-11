@@ -1,7 +1,7 @@
 import os
 
 
-def rename_files_in_folder(folder_path, new_name="image", start_index=1):
+def rename_files_in_folder(folder_path, new_name="image", start_index=206001):
     try:
         files = sorted(
             [
@@ -26,6 +26,8 @@ def rename_files_in_folder(folder_path, new_name="image", start_index=1):
 
 
 drive_path = "D:/KennyNeutron_TheCoder/Projects"  # change this to the path of the project based on the user's computer
-folder_path = f"{drive_path}/Meme_Sentiment_Analysis/images/images_DataSet_Final"
+folder_path = (
+    f"{drive_path}/Meme_Sentiment_Analysis/images/DataSet_Final/CompensationBatch2"
+)
 
 rename_files_in_folder(folder_path)

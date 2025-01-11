@@ -44,6 +44,8 @@ def rename_files_with_random_names(folder_path, name_length=20):
 
 # Example usage
 drive_path = "D:/KennyNeutron_TheCoder/Projects"  # Adjust this to your project path
-folder_path = f"{drive_path}/Meme_Sentiment_Analysis/images_DataSet_Final"
+folder_path = (
+    f"{drive_path}/Meme_Sentiment_Analysis/images/DataSet_Final/CompensationBatch2"
+)
 
 rename_files_with_random_names(folder_path)
