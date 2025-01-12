@@ -34,6 +34,14 @@ The Meme Sentiment Analysis project processes multilingual memes, including Fili
 4. **Visualization**
    - Creates sentiment distribution charts for visual representation of data.
 
+## Bar Graph Generation
+The `Bargraph_Generator.py` script generates a bar graph from the sentiment analysis results stored in the Excel file. This bar graph visually represents the distribution of sentiments (Positive, Neutral, Negative).
+
+### Example Bar Graph
+Below is an example of a generated bar graph:
+
+![Example Bar Graph](SampleResult.png)
+
 ## How to Use
 1. Install the required dependencies using the `requirements.txt` file:
    ```bash
@@ -51,6 +59,11 @@ The Meme Sentiment Analysis project processes multilingual memes, including Fili
    - Image captions.
    - Sentiment analysis results.
    - An Excel file with detailed data.
+
+To generate a bar graph from the results, run the `Bargraph_Generator.py` script:
+   ```bash
+   python Bargraph_Generator.py
+   ```
 
 ## Prerequisites
 - Python 3.8 or higher.
