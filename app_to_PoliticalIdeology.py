@@ -1,5 +1,6 @@
 import os
 import shutil
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from googletrans import Translator
 from transformers import BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
@@ -7,27 +8,35 @@ import torch
 from torch.cuda.amp import autocast
 import easyocr
 
+# Load the fine-tuned NLP model for ideology classification
+model_path = "./fine_tuned_model"
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForSequenceClassification.from_pretrained(model_path)
+
+# Reverse label mapping
+REVERSE_LABEL_MAP = {
+    0: "Conservatism",
+    1: "Socialism",
+    2: "Anarchism",
+    3: "Nationalism",
+    4: "Fascism",
+    5: "Feminism",
+    6: "Green Ideology",
+    7: "Islamism",
+}
+
 # Initialize the translator and OCR reader
 translator = Translator()
 reader = easyocr.Reader(["en", "tl"], gpu=True)
 
 # Pretrained BLIP model initialization
 processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-model = BlipForConditionalGeneration.from_pretrained(
+model_blip = BlipForConditionalGeneration.from_pretrained(
     "Salesforce/blip-image-captioning-base"
 ).to("cuda")
 
 # Define the ideologies
-IDEOLOGIES = [
-    "Conservatism",
-    "Socialism",
-    "Anarchism",
-    "Nationalism",
-    "Fascism",
-    "Feminism",
-    "Green Ideology",
-    "Islamism",
-]
+IDEOLOGIES = list(REVERSE_LABEL_MAP.values())
 
 
 def extract_text(image_path):
@@ -55,7 +64,7 @@ def generate_caption(image_path):
         image = Image.open(image_path)
         inputs = processor(images=image, return_tensors="pt").to("cuda")
         with autocast("cuda"):
-            out = model.generate(**inputs)
+            out = model_blip.generate(**inputs)
         caption = processor.decode(out[0], skip_special_tokens=True)
         return caption
     except Exception as e:
@@ -64,12 +73,18 @@ def generate_caption(image_path):
 
 
 def classify_image(text, caption):
-    """Classify image based on text and caption."""
-    combined_content = f"{text} {caption}".lower()
-    for ideology in IDEOLOGIES:
-        if ideology.lower() in combined_content:
-            return ideology
-    return "Unclassified"
+    """Classify image based on text and caption using the fine-tuned NLP model."""
+    combined_content = f"{text} {caption}"
+    try:
+        inputs = tokenizer(
+            combined_content, return_tensors="pt", padding=True, truncation=True
+        )
+        outputs = model(**inputs)
+        predicted_label = outputs.logits.argmax(dim=-1).item()
+        return REVERSE_LABEL_MAP.get(predicted_label, "Unclassified")
+    except Exception as e:
+        print(f"Classification error: {e}")
+        return "Unclassified"
 
 
 def process_folder(folder_path):
@@ -105,9 +120,8 @@ def process_folder(folder_path):
 
 
 if __name__ == "__main__":
-    if __name__ == "__main__":
-        folder_path = input("Enter the folder path containing images: ").strip()
-        if os.path.isdir(folder_path):
-            process_folder(folder_path)
-        else:
-            print(f"The folder '{folder_path}' does not exist.")
+    folder_path = input("Enter the folder path containing images: ").strip()
+    if os.path.isdir(folder_path):
+        process_folder(folder_path)
+    else:
+        print(f"The folder '{folder_path}' does not exist.")
