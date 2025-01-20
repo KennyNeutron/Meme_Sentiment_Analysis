@@ -6,6 +6,7 @@ from tqdm import tqdm
 import random
 import torch
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import re
 
 # Load the fine-tuned NLP model for ideology classification
 model_path = "./fine_tuned_model"
@@ -27,6 +28,17 @@ REVERSE_LABEL_MAP = {
 # Define the ideologies
 IDEOLOGIES = list(REVERSE_LABEL_MAP.values())
 
+# Define stop words for filtering
+STOP_WORDS = {"lahat", "ng", "sa", "ang", "mga", "ito", "ay", "at", "dapat"}
+
+
+def preprocess_text(text):
+    """Remove stop words and non-English words from the text."""
+    # Remove non-English words using regex
+    english_words = re.findall(r"[a-zA-Z]+", text)
+    filtered_words = [word for word in english_words if word.lower() not in STOP_WORDS]
+    return " ".join(filtered_words)
+
 
 def classify_text(content):
     """Classify content into a political ideology using GPU if available."""
@@ -36,13 +48,16 @@ def classify_text(content):
         )  # Assign "Unclassified" randomly to an ideology
 
     try:
+        # Preprocess the text to remove stop words and non-English words
+        filtered_content = preprocess_text(content)
+
         # Move model to GPU if CUDA is available
         device = "cuda" if torch.cuda.is_available() else "cpu"
         model.to(device)
 
         # Tokenize input and move to the appropriate device
         inputs = tokenizer(
-            content, return_tensors="pt", padding=True, truncation=True
+            filtered_content, return_tensors="pt", padding=True, truncation=True
         ).to(device)
 
         # Perform inference
@@ -136,7 +151,7 @@ def process_sentiment_results(input_excel, output_excel, output_image):
 
 
 if __name__ == "__main__":
-    ie = "Results/RQ1_and_RQ2/Sentiment_Analysis_Results.xlsx"
+    ie = "images/Results_Backup/RQ1_and_RQ2/Sentiment_Analysis_Results_bak_Batch1.xlsx"
     oe = "Results/RQ4/PoliticalIdeology_Results.xlsx"
     oi = "Results/RQ4/PoliticalIdeology_BarGraph.png"
     input_excel = ie.strip()
