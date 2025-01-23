@@ -15,7 +15,7 @@ IDEOLOGY_TO_AFFILIATION = {
     "Feminism": ["Liberal Party"],
     "Green Ideology": ["Aksyon Demokratiko", "Bagumbayan-VNP"],
     "Islamism": ["Lakas-CMD"],
-    "Liberalism": ["Liberal Party", "Aksyon Demokratiko"],
+    "Liberalism": ["Liberal Party", "Aksyon Demokratiko", "PFP"],  # Added PFP here
 }
 
 # Load your trained ideology model and tokenizer

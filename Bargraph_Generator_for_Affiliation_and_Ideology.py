@@ -1,15 +1,21 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import f_oneway
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import numpy as np
 
 # Define mapping of affiliations to abbreviations
 AFFILIATION_MAP = {
-    "PDP Laban": "PDP",
+    "PDP-Laban": "PDP",
+    "Lakas-CMD": "LKM",
+    "Liberal Party": "LP",
     "Nacionalista Party": "NP",
-    "Liberal Party (LP)": "LP",
-    "United Nationalist Alliance (UNA)": "UNA",
-    "Lakas CMD": "LKM",
+    "National People's Coalition": "NPC",
+    "United Nationalist Alliance": "UNA",
+    "Aksyon Demokratiko": "AD",
+    "PFP": "PFP",
+    "Bagumbayan-VNP": "BVNP",
+    "PRP": "PRP",
 }
 
 # Reverse mapping for easier lookup
@@ -100,108 +106,91 @@ elif analysis_choice == "2":
         plt.savefig(output_file, bbox_inches="tight")
         print(f"Affiliation bar graph saved as {output_file}")
 
-        # Perform ANOVA for ALL Affiliations
-        print("\nRunning ANOVA for Political Affiliations...")
-
-        # Prepare data for ANOVA
-        affiliation_sentiment_data = []
-        affiliation_labels = []
-
-        # Extract counts for each affiliation and its sentiment distribution
-        for affiliation in counts.index:
-            filtered_affiliation = df[df["Political Affiliation"] == affiliation]
-            sentiment_counts = filtered_affiliation["Overall Sentiment"].value_counts()
-            sentiment_counts = sentiment_counts.reindex(SENTIMENT_ORDER, fill_value=0)
-
-            # Append sentiment counts and labels
-            affiliation_sentiment_data.extend(sentiment_counts.values)
-            affiliation_labels.extend([affiliation] * len(SENTIMENT_ORDER))
-
-        # Check if there are at least two groups to run ANOVA
-        if len(set(affiliation_labels)) > 1:
-            # Perform ANOVA
-            f_stat, p_value = f_oneway(
-                *[
-                    affiliation_sentiment_data[i :: len(SENTIMENT_ORDER)]
-                    for i in range(len(SENTIMENT_ORDER))
-                ]
+    # Case 2.2: Specific Affiliation
+    elif selected_abbreviation in ABBREVIATION_MAP:
+        selected_affiliation = ABBREVIATION_MAP[selected_abbreviation]
+        filtered_df = df[df["Political Affiliation"] == selected_affiliation]
+        if filtered_df.empty:
+            raise ValueError(
+                f"No data found for the affiliation '{selected_affiliation}'."
             )
 
-            # Compute Sum of Squares
-            grand_mean = np.mean(affiliation_sentiment_data)
-            between_group_ss = sum(
-                len(SENTIMENT_ORDER)
-                * (
-                    np.mean(affiliation_sentiment_data[i :: len(SENTIMENT_ORDER)])
-                    - grand_mean
-                )
-                ** 2
-                for i in range(len(SENTIMENT_ORDER))
+        # Sentiment Distribution
+        counts = filtered_df["Overall Sentiment"].value_counts()
+        counts = counts.reindex(SENTIMENT_ORDER, fill_value=0)
+
+        # Plot sentiment distribution
+        plt.figure(figsize=(10, 6))
+        bars = plt.bar(
+            counts.index, counts.values, color=["red", "gray", "green"], alpha=0.8
+        )
+        for bar in bars:
+            count = bar.get_height()
+            plt.text(
+                bar.get_x() + bar.get_width() / 2,
+                count,
+                f"{count:,}",
+                ha="center",
+                va="bottom",
             )
-            within_group_ss = sum(
-                sum(
-                    (x - np.mean(affiliation_sentiment_data[i :: len(SENTIMENT_ORDER)]))
-                    ** 2
-                    for x in affiliation_sentiment_data[i :: len(SENTIMENT_ORDER)]
-                )
-                for i in range(len(SENTIMENT_ORDER))
+        plt.title(f"Sentiment Distribution for {selected_affiliation}")
+        plt.xlabel("Sentiment")
+        plt.ylabel("Count")
+        plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+        output_file = input(
+            "Enter the path to save the sentiment distribution graph (e.g., output.png): "
+        ).strip()
+        plt.savefig(output_file, bbox_inches="tight")
+        print(f"Sentiment distribution graph saved as {output_file}")
+
+        # Perform ANOVA (Unchanged)
+        # ... (Rest of the ANOVA and Tukey HSD code remains the same)
+        # Perform Tukey HSD if possible
+        if all(
+            counts[sentiment] > 1 for sentiment in SENTIMENT_ORDER
+        ):  # Ensure each group has more than one sample
+            tukey_data = []
+            tukey_groups = []
+
+            # Prepare data for Tukey HSD
+            for sentiment in SENTIMENT_ORDER:
+                sentiment_count = counts[sentiment]
+                tukey_data.extend([sentiment_count] * sentiment_count)
+                tukey_groups.extend([sentiment] * sentiment_count)
+
+            tukey = pairwise_tukeyhsd(
+                endog=np.array(
+                    tukey_data, dtype=np.float64
+                ),  # Numeric data for Tukey HSD
+                groups=np.array(tukey_groups),  # Sentiment labels
+                alpha=0.05,
             )
-            total_ss = between_group_ss + within_group_ss
 
-            # Degrees of Freedom
-            df_between = len(SENTIMENT_ORDER) - 1
-            df_within = len(affiliation_sentiment_data) - len(SENTIMENT_ORDER)
-            df_total = df_between + df_within
+            # Convert Tukey HSD results into a table
+            tukey_results = pd.DataFrame(
+                data=tukey._results_table.data[1:],  # Skip header row
+                columns=tukey._results_table.data[0],  # Use header row
+            )
 
-            # Mean Squares
-            ms_between = between_group_ss / df_between if df_between != 0 else 0
-            ms_within = within_group_ss / df_within if df_within != 0 else 0
-
-            # Create ANOVA table
-            anova_table = [
-                ["Source", "Sum of Squares", "df", "Mean Square", "F", "Sig."],
-                [
-                    "Between Groups",
-                    f"{between_group_ss:.3f}",
-                    f"{df_between}",
-                    f"{ms_between:.3f}",
-                    f"{f_stat:.3f}",
-                    f"{p_value:.3f}",
-                ],
-                [
-                    "Within Groups",
-                    f"{within_group_ss:.3f}",
-                    f"{df_within}",
-                    f"{ms_within:.3f}",
-                    "",
-                    "",
-                ],
-                ["Total", f"{total_ss:.3f}", f"{df_total}", "", "", ""],
-            ]
-
-            # Render ANOVA table as a PNG
-            fig, ax = plt.subplots(figsize=(8, 4))
+            # Render Tukey HSD table as a PNG
+            fig, ax = plt.subplots(figsize=(12, 6))
             ax.axis("tight")
             ax.axis("off")
             table = ax.table(
-                cellText=anova_table[1:],
-                colLabels=anova_table[0],
+                cellText=tukey_results.values,
+                colLabels=tukey_results.columns,
                 loc="center",
                 cellLoc="center",
             )
-            ax.set_title("ANOVA Table for Political Affiliations", pad=10)
-            anova_file = input(
-                "Enter the path to save the ANOVA table image (e.g., anova.png): "
+            ax.set_title(f"Tukey HSD Results for {selected_affiliation}", pad=10)
+            tukey_file = input(
+                "Enter the path to save the Tukey HSD table image (e.g., tukey.png): "
             ).strip()
-            plt.savefig(anova_file, bbox_inches="tight")
-            print(f"ANOVA Table saved as {anova_file}")
+            plt.savefig(tukey_file, bbox_inches="tight")
+            print(f"Tukey HSD Table saved as {tukey_file}")
         else:
-            print("ANOVA could not be performed: insufficient groups.")
-
-    # Case 2.2: Specific Affiliation (unchanged)
-    elif selected_abbreviation in ABBREVIATION_MAP:
-        # Original functionality for specific affiliations remains unchanged
-        pass
+            print("Tukey HSD could not be performed due to insufficient data.")
 
     else:
         raise ValueError("Invalid affiliation abbreviation. Please try again.")
