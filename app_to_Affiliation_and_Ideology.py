@@ -7,15 +7,15 @@ import random
 
 # Define the mapping between ideologies and political affiliations
 IDEOLOGY_TO_AFFILIATION = {
-    "Conservatism": ["PDP Laban", "Nacionalista Party"],
-    "Socialism": ["Liberal Party (LP)"],
-    "Anarchism": ["Nacionalista Party", "Liberal Party (LP)"],
-    "Nationalism": ["PDP Laban", "Nacionalista Party"],
-    "Fascism": ["PDP Laban", "United Nationalist Alliance (UNA)"],
-    "Feminism": ["Liberal Party (LP)"],
-    "Green Ideology": ["Liberal Party (LP)"],
-    "Islamism": ["Lakas CMD"],
-    "Liberalism": ["Liberal Party (LP)"],
+    "Conservatism": ["PDP-Laban", "Nacionalista Party"],
+    "Socialism": ["Liberal Party", "Aksyon Demokratiko"],
+    "Anarchism": ["Bagumbayan-VNP", "PRP"],
+    "Nationalism": ["PDP-Laban", "Nacionalista Party", "National People's Coalition"],
+    "Fascism": ["United Nationalist Alliance", "PDP-Laban"],
+    "Feminism": ["Liberal Party"],
+    "Green Ideology": ["Aksyon Demokratiko", "Bagumbayan-VNP"],
+    "Islamism": ["Lakas-CMD"],
+    "Liberalism": ["Liberal Party", "Aksyon Demokratiko"],
 }
 
 # Load your trained ideology model and tokenizer
@@ -60,7 +60,7 @@ def map_affiliation(ideology):
             for affil in affils
         ]
         return random.choice(all_affiliations)
-    return IDEOLOGY_TO_AFFILIATION.get(ideology, ["Unclassified"])[0]
+    return random.choice(IDEOLOGY_TO_AFFILIATION.get(ideology, ["Unclassified"]))
 
 
 # Read the Excel file
