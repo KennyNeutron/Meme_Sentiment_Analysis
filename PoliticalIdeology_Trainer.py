@@ -17,6 +17,7 @@ LABEL_MAP = {
     "Feminism": 5,
     "Green Ideology": 6,
     "Islamism": 7,
+    "Liberalism": 8,
 }
 
 
@@ -50,7 +51,7 @@ def train_model(dataset_path, output_dir="./fine_tuned_model_for_PoliticalIdeolo
     # Load tokenizer and model
     model_name = "bert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=8)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=9)
 
     # Tokenize datasets
     train_dataset = train_dataset.map(
@@ -67,7 +68,7 @@ def train_model(dataset_path, output_dir="./fine_tuned_model_for_PoliticalIdeolo
     # Define training arguments
     training_args = TrainingArguments(
         output_dir=output_dir,
-        eval_strategy="epoch",  # Updated from evaluation_strategy
+        eval_strategy="epoch",
         learning_rate=2e-5,
         per_device_train_batch_size=16,
         num_train_epochs=3,

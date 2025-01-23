@@ -15,6 +15,7 @@ REVERSE_LABEL_MAP = {
     5: "Feminism",
     6: "Green Ideology",
     7: "Islamism",
+    8: "Liberalism",
 }
 
 # Ask user for input text

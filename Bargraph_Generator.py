@@ -26,7 +26,7 @@ def generate_sentiment_bargraph(excel_file_path, output_image_path):
         # Create the bar graph
         plt.figure(figsize=(8, 6))
         bars = sentiment_counts.plot(
-            kind="bar", color=["gray", "red", "green"], alpha=0.7
+            kind="bar", color=["gray", "green", "red"], alpha=0.7
         )
         plt.title("Sentiment Analysis Distribution", fontsize=14)
         plt.xlabel("Sentiment", fontsize=12)
