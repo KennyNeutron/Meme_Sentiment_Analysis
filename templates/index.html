@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meme Sentiment Analysis</title>
+    <script>
+      function uploadImage() {
+        let formData = new FormData();
+        let image = document.getElementById("imageInput").files[0];
+        formData.append("image", image);
+
+        fetch("/", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("results").innerHTML = `
+                    <h3>Results:</h3>
+                    <p><b>Extracted Text:</b> ${data.extracted_text}</p>
+                    <p><b>Translated Text:</b> ${data.translated_text}</p>
+                    <p><b>Image Caption:</b> ${data.image_caption}</p>
+                    <p><b>Text Sentiment:</b> ${data.text_sentiment}</p>
+                    <p><b>Caption Sentiment:</b> ${data.caption_sentiment}</p>
+                    <p><b>Overall Sentiment:</b> <span style="color: ${
+                      data.overall_sentiment === "Positive"
+                        ? "green"
+                        : data.overall_sentiment === "Negative"
+                        ? "red"
+                        : "gray"
+                    };">${data.overall_sentiment}</span></p>
+                `;
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+    </script>
+  </head>
+  <body>
+    <h2>Meme Sentiment Analysis</h2>
+    <input type="file" id="imageInput" accept="image/*" />
+    <button onclick="uploadImage()">Analyze Image</button>
+    <div id="results"></div>
+  </body>
+</html>
