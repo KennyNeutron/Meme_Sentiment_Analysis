@@ -29,44 +29,51 @@
         let image = document.getElementById("imageInput").files[0];
         formData.append("image", image);
 
-        fetch("/", {
-          method: "POST",
-          body: formData,
-        })
+        fetch("/", { method: "POST", body: formData })
           .then((response) => response.json())
           .then((data) => {
             document.getElementById("results").innerHTML = `
-                    <div class="result-container">
-                        <h3>Uploaded Image:</h3>
-                        <img src="${data.image_url}" alt="Uploaded Image" />
-                        <h3>Results:</h3>
-                        <p><b>Extracted Text:</b> ${data.extracted_text}</p>
-                        <p><b>Translated Text:</b> ${data.translated_text}</p>
-                        <p><b>Image Caption:</b> ${data.image_caption}</p>
-                        <p><b>Text Sentiment:</b> ${data.text_sentiment}</p>
-                        <p><b>Caption Sentiment:</b> ${
-                          data.caption_sentiment
-                        }</p>
-                        <p><b>Overall Sentiment:</b> 
-                            <span style="color: ${
-                              data.overall_sentiment === "Positive"
-                                ? "green"
-                                : data.overall_sentiment === "Negative"
-                                ? "red"
-                                : "gray"
-                            };">
-                                ${data.overall_sentiment}
-                            </span>
-                        </p>
-                    </div>
-                `;
+                        <div class="result-container">
+                            <h3>Uploaded Image:</h3>
+                            <img src="${data.image_url}" alt="Uploaded Image" />
+                            <h3>Results:</h3>
+                            <p><b>Extracted Text:</b> ${data.extracted_text}</p>
+                            <p><b>Translated Text:</b> ${
+                              data.translated_text
+                            }</p>
+                            <p><b>Image Caption:</b> ${data.image_caption}</p>
+                            <p><b>Text Sentiment:</b> ${data.text_sentiment}</p>
+                            <p><b>Caption Sentiment:</b> ${
+                              data.caption_sentiment
+                            }</p>
+                            <p><b>Overall Sentiment:</b> 
+                                <span style="color: ${
+                                  data.overall_sentiment === "Positive"
+                                    ? "green"
+                                    : data.overall_sentiment === "Negative"
+                                    ? "red"
+                                    : "gray"
+                                };">
+                                    ${data.overall_sentiment}
+                                </span>
+                            </p>
+                            <hr>
+                            <h3>Political Analysis:</h3>
+                            <p><b>Predicted Ideology:</b> ${
+                              data.predicted_ideology
+                            }</p>
+                            <p><b>Political Affiliation:</b> ${
+                              data.political_affiliation
+                            }</p>
+                        </div>
+                    `;
           })
           .catch((error) => console.error("Error:", error));
       }
     </script>
   </head>
   <body>
-    <h2>Meme Sentiment Analysis</h2>
+    <h2>Meme Sentiment & Political Analysis</h2>
     <input type="file" id="imageInput" accept="image/*" />
     <button onclick="uploadImage()">Analyze Image</button>
     <div id="results"></div>

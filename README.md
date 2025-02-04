@@ -150,3 +150,53 @@ python Bargraph_Generator.py
 ## Contact
 
 For questions, feedback, or contributions, contact Kenny Walter Diolola. Connect to explore further opportunities to refine and expand this project.
+
+## Web Application
+
+The Meme Sentiment Analysis project now includes a **web application** accessible via any browser. It allows users to upload images and get real-time sentiment and political analysis.
+
+### How to Use the Web App
+
+1. **Run the Web App:**
+   ```bash
+   python app.py
+   ```
+2. **Open your browser:**
+   - Go to `http://127.0.0.1:5000/`.
+   - Upload an image to receive analysis results instantly.
+
+### Web App Features
+
+- **Real-time Analysis:** Upload images and get results instantly.
+- **Displays Uploaded Image:** See the image alongside the analysis results.
+- **Integrated Political Analysis:** Provides political ideology and affiliation predictions.
+
+## Political Ideology & Affiliation Prediction
+
+The system predicts the **political ideology** and maps it to a **political affiliation** based on the extracted text and generated captions. This feature supports ideologies like:
+
+- **Conservatism**
+- **Socialism**
+- **Liberalism**
+- **Feminism**
+- **Islamism**
+- And more...
+
+Mapped to political affiliations such as:
+
+- **PDP-Laban**
+- **Liberal Party**
+- **Nacionalista Party**
+- **Aksyon Demokratiko**
+- And others...
+
+### Example Results
+
+- **Extracted Text:** "This is a meme text."
+- **Translated Text:** "Translated version of the text."
+- **Image Caption:** "A funny situation depicted in a meme."
+- **Text Sentiment:** Positive
+- **Caption Sentiment:** Neutral
+- **Overall Sentiment:** Positive
+- **Predicted Ideology:** Liberalism
+- **Political Affiliation:** Liberal Party
