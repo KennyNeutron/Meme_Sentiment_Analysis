@@ -4,6 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meme Sentiment Analysis</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .result-container {
+        margin-top: 20px;
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 8px;
+        max-width: 500px;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+      }
+    </style>
     <script>
       function uploadImage() {
         let formData = new FormData();
@@ -17,19 +36,29 @@
           .then((response) => response.json())
           .then((data) => {
             document.getElementById("results").innerHTML = `
-                    <h3>Results:</h3>
-                    <p><b>Extracted Text:</b> ${data.extracted_text}</p>
-                    <p><b>Translated Text:</b> ${data.translated_text}</p>
-                    <p><b>Image Caption:</b> ${data.image_caption}</p>
-                    <p><b>Text Sentiment:</b> ${data.text_sentiment}</p>
-                    <p><b>Caption Sentiment:</b> ${data.caption_sentiment}</p>
-                    <p><b>Overall Sentiment:</b> <span style="color: ${
-                      data.overall_sentiment === "Positive"
-                        ? "green"
-                        : data.overall_sentiment === "Negative"
-                        ? "red"
-                        : "gray"
-                    };">${data.overall_sentiment}</span></p>
+                    <div class="result-container">
+                        <h3>Uploaded Image:</h3>
+                        <img src="${data.image_url}" alt="Uploaded Image" />
+                        <h3>Results:</h3>
+                        <p><b>Extracted Text:</b> ${data.extracted_text}</p>
+                        <p><b>Translated Text:</b> ${data.translated_text}</p>
+                        <p><b>Image Caption:</b> ${data.image_caption}</p>
+                        <p><b>Text Sentiment:</b> ${data.text_sentiment}</p>
+                        <p><b>Caption Sentiment:</b> ${
+                          data.caption_sentiment
+                        }</p>
+                        <p><b>Overall Sentiment:</b> 
+                            <span style="color: ${
+                              data.overall_sentiment === "Positive"
+                                ? "green"
+                                : data.overall_sentiment === "Negative"
+                                ? "red"
+                                : "gray"
+                            };">
+                                ${data.overall_sentiment}
+                            </span>
+                        </p>
+                    </div>
                 `;
           })
           .catch((error) => console.error("Error:", error));

@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, send_from_directory
 import easyocr
 from googletrans import Translator
 from transformers import BlipProcessor, BlipForConditionalGeneration
@@ -91,9 +91,10 @@ def index():
             else "Negative" if overall_score <= -0.05 else "Neutral"
         )
 
-        # Return results as JSON
+        # Return results along with image path
         return jsonify(
             {
+                "image_url": f"/uploads/{image.filename}",
                 "extracted_text": extracted_text,
                 "translated_text": translated_text,
                 "image_caption": image_caption,
@@ -104,6 +105,12 @@ def index():
         )
 
     return render_template("index.html")
+
+
+# Serve uploaded images
+@app.route("/uploads/<filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
 if __name__ == "__main__":
